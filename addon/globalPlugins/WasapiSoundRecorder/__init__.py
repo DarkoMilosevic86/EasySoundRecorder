@@ -88,7 +88,6 @@ class SettingsDialog(gui.SettingsDialog):
 
 class GlobalPlugin(GlobalPlugin):
 	def _initialize_recorder(self):
-		"""Kreira novu instancu snimača sa trenutnom konfiguracijom."""
 		global recorder
 		if recorder:
 			recorder = None
@@ -113,15 +112,16 @@ class GlobalPlugin(GlobalPlugin):
 		recorder = WasapiSoundRecorder(self.conf["Settings"]["recording_format"], self.conf["Settings"]["recording_folder"])
 
 	@script(
-		description=_("Start recording audio")
+		description=_("Starts, pauses and resumes recording")
 	)
 	def script_startRecording(self, gesture):
 		if recorder.recording == 1:
 			recorder.pause_recording()
 			ui.message(_("Recording paused"))
 		elif recorder.recording == 2:
-			recorder.resume_recording()
 			ui.message(_("Recording resumed"))
+			sleep(1)
+			recorder.resume_recording()
 		else:
 			self._initialize_recorder()
 			ui.message(_("Recording started"))
@@ -134,7 +134,7 @@ class GlobalPlugin(GlobalPlugin):
 	def script_stopRecording(self, gesture):
 		if recorder.recording == 1 or recorder.recording == 2:
 			recorder.stop_recording()
-			ui.message(_("Recording stopped."))
+			ui.message(_("Recording stopped"))
 		else:
 			ui.message(_("No recording is in progress."))
 
