@@ -129,7 +129,7 @@ class GlobalPlugin(GlobalPlugin):
 			recorder.start_recording()
 
 	@script(
-		description=_("Stop recording audio")
+		description=_("Stops recording and saves the audio file using specifyed format.")
 	)
 	def script_stopRecording(self, gesture):
 		if recorder.recording == 1 or recorder.recording == 2:
