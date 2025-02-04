@@ -4,7 +4,6 @@
 
 
 
-from time import sleep
 import sys
 from globalPluginHandler import GlobalPlugin
 import gui.guiHelper
@@ -120,12 +119,10 @@ class GlobalPlugin(GlobalPlugin):
 			ui.message(_("Recording paused"))
 		elif recorder.recording == 2:
 			ui.message(_("Recording resumed"))
-			sleep(1)
 			recorder.resume_recording()
 		else:
 			self._initialize_recorder()
 			ui.message(_("Recording started"))
-			sleep(1)
 			recorder.start_recording()
 
 	@script(
