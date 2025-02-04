@@ -1,15 +1,15 @@
 {
-	"addonId": "DarkoMilosevic.WASAPISoundRecorder",
+	"addonId": "DarkoMilosevic.EasySoundRecorder",
 	"addonVersionNumber": {
 		"major": 1,
 		"minor": 0,
 		"patch": 0
 	},
 	"addonVersionName": "1.00",
-	"displayName": "Wasapi Sound Recorder",
+	"displayName": "Easy Sound Recorder",
 	"publisher": "Darko Milosevic",
 	"description": "Records sound from microphone and sound card using WASAPI.",
-	"homepage": "https://github.com/DarkoMilosevic86/WasapiSoundRecorder",
+	"homepage": "https://github.com/DarkoMilosevic86/EasySoundRecorder",
 	"minNVDAVersion": {
 		"major": 2019,
 		"minor": 3,
@@ -21,9 +21,9 @@
 		"patch": 0
 	},
 	"channel": "stable",
-	"URL": "https://github.com/DarkoMilosevic86/WasapiSoundRecorder/releases/download/v1.0.0/WasapiSoundRecorder-1.0.0.nvda-addon ",
-	"sha256": "059c757a3540b4f1b751124e2a343d140b4e11ce2b7eea2a2e5a8b8e94f7d5fe",
-	"sourceURL": "https://github.com/DarkoMilosevic86/WasapiSoundRecorder",
+	"URL": "https://github.com/DarkoMilosevic86/EasySoundRecorder/releases/download/v1.0.0/EasySoundRecorder-1.0.0.nvda-addon",
+	"sha256": "126c3789b782e08b474b3d79a07adb2217266343d404f3597ca46ed14a295c6f",
+	"sourceURL": "https://github.com/DarkoMilosevic86/EasySoundRecorder",
 	"license": "GPL v2",
 	"licenseURL": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
 }
