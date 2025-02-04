@@ -25,7 +25,7 @@ addonHandler.initTranslation()
 
 recorder = None
 _config = None
-conf_file = "WasapiSoundRecorder.ini"
+conf_file = "EasySoundRecorder.ini"
 configspec = StringIO("""
 					[Settings]
 					recording_format = string(default = "")
@@ -44,7 +44,7 @@ def get_config():
 
 class SettingsDialog(gui.SettingsDialog):
 	# Translators: Settings dialog title
-	title=_("Wasapi Sound Recorder settings")
+	title=_("Easy Sound Recorder settings")
 
 	def on_browse_recording_folder_button(self, event):
 		# Translators: Browse for folder dialog caption
@@ -81,9 +81,9 @@ class SettingsDialog(gui.SettingsDialog):
 		try:
 			self.conf.write()
 		except IOError:
-			log.error("Error writing Wasapi Sound Recorder configuration", exc_info=True)
+			log.error("Error writing Easy Sound Recorder configuration", exc_info=True)
 			# Translators: Error saving configuration message
-			gui.messageBox(e.strerror, _("Error while saving Wasapi Sound Recorder configuration."), style=wx.OK | wx.ICON_ERROR)
+			gui.messageBox(e.strerror, _("Error while saving Easy Sound Recorder configuration."), style=wx.OK | wx.ICON_ERROR)
 		super(SettingsDialog, self).onOk(event)
 
 class GlobalPlugin(GlobalPlugin):
@@ -96,18 +96,18 @@ class GlobalPlugin(GlobalPlugin):
 			recording_folder=self.conf["Settings"]["recording_folder"])
 	def __init__(self):
 		super().__init__()
-		self.WasapiSoundRecorderSettingsItem = gui.mainFrame.sysTrayIcon.preferencesMenu.Append(wx.ID_ANY, _("Wasapi Sound Recorder settings..."))
+		self.WasapiSoundRecorderSettingsItem = gui.mainFrame.sysTrayIcon.preferencesMenu.Append(wx.ID_ANY, _("Easy Sound Recorder settings..."))
 		gui.mainFrame.sysTrayIcon.Bind(wx.EVT_MENU, lambda evt: gui.mainFrame._popupSettingsDialog(SettingsDialog), self.WasapiSoundRecorderSettingsItem)
 		self.conf = get_config()
 		if not self.conf["Settings"]["recording_format"] and not self.conf["Settings"]["recording_folder"]:
 			self.conf["Settings"]["recording_format"] = "wav"
-			self.conf["Settings"]["recording_folder"] = os.path.join(os.environ["USERPROFILE"], "Documents", "Wasapi Sound Recorder")
+			self.conf["Settings"]["recording_folder"] = os.path.join(os.environ["USERPROFILE"], "Documents", "Easy Sound Recorder")
 			try:
 				self.conf.write()
 			except IOError:
-				log.error("Error writing Wasapi Sound Recorder configuration", exc_info=True)
+				log.error("Error writing Easy Sound Recorder configuration", exc_info=True)
 				# Translators: Error saving configuration message
-				gui.messageBox(e.strerror, _("Error while saving Wasapi Sound Recorder configuration."), style=wx.OK | wx.ICON_ERROR)
+				gui.messageBox(e.strerror, _("Error while saving Easy Sound Recorder configuration."), style=wx.OK | wx.ICON_ERROR)
 		global recorder
 		recorder = WasapiSoundRecorder(self.conf["Settings"]["recording_format"], self.conf["Settings"]["recording_folder"])
 

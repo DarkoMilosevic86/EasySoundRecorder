@@ -16,11 +16,11 @@ def _(arg):
 # Add-on information variables
 addon_info = {
 	# add-on Name/identifier, internal for NVDA
-	"addon_name": "WasapiSoundRecorder",
+	"addon_name": "EasySoundRecorder",
 	# Add-on summary, usually the user visible name of the addon.
 	# Translators: Summary for this add-on
 	# to be shown on installation and add-on information found in Add-ons Manager.
-	"addon_summary": _("WASAPI Sound Recorder"),
+	"addon_summary": _("Easy Sound Recorder"),
 	# Add-on description
 	# Translators: Long description to be shown for this add-on on add-on information from add-ons manager
 	"addon_description": _("Records sound from microphone and sound card using WASAPI."),

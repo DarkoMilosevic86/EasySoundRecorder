@@ -5,7 +5,7 @@
 
 import os
 import sys
-""" Now we need to expand the current globalPlugins\WasapiSoundRecorder folder.
+""" Now we need to expand the current globalPlugins\EasySoundRecorder folder.
 We are doing so because some necesary libraries as part of the plugin."""
 module_path = os.path.dirname(__file__)
 if module_path not in sys.path:
@@ -18,7 +18,7 @@ from pydub.utils import audioop
 import threading
 
 class WasapiSoundRecorder:
-	def __init__(self, recording_format="wav", recording_folder=os.path.join(os.environ['USERPROFILE'], "Documents", "Wasapi Sound Recorder")):
+	def __init__(self, recording_format="wav", recording_folder=os.path.join(os.environ['USERPROFILE'], "Documents", "Easy Sound Recorder")):
 		self.recording_folder = recording_folder
 		self.recording_format = recording_format
 		self.audio_interface = pyaudio.PyAudio()
