@@ -32,11 +32,24 @@ class WasapiSoundRecorder:
 		self.mic_data = []
 		self.frames = []
 
+# Function for resampling audio data
+	def resample_audio_data(self, data_buffer, channels, in_rate, out_rate):
+		state = None
+		converted_audio, _ = audioop.ratecv(data_buffer, 2, channels, in_rate, out_rate, state)
+		expected_len = int(len(data_buffer) * (out_rate / in_rate))
+		if len(converted_audio) < expected_len:
+			converted_audio += b"\x00" * (expected_len - len(converted_audio))
+		elif len(converted_audio) > expected_len:
+			converted_audio = converted_audio[:expected_len]
+		return converted_audio
+
 # Function definition for combining speakers and microphone streams together
 	def write_audio_data(self):
 		for i in range(min(len(self.speaker_data), len(self.mic_data))):
 			speaker_chunk = self.speaker_data[i]
 			mic_chunk = self.mic_data[i]
+			speaker_chunk = self.resample_audio_data(speaker_chunk, 2, int(self.default_speakers["defaultSampleRate"]), 48000)
+			mic_chunk = self.resample_audio_data(mic_chunk, 2, int(self.default_mic["defaultSampleRate"]), 48000)
 			combined_data = bytearray()
 			for j in range(0, len(speaker_chunk), 2):
 				speaker_sample = int.from_bytes(speaker_chunk[j:j + 2], "little", signed=True)
@@ -70,21 +83,19 @@ class WasapiSoundRecorder:
 					break
 		return device
 
-# Getting the default microphone. Microphone is not necesary to be loopback device.
+# Getting the default loopback microphone
 	def get_default_loopback_mic(self):
 		try:
-			""" Trying to find microphone with the same sample rate as speakers.
-			This will prevent microphone clipping. """
-			device_count = self.audio_interface.get_device_count()
-			default_device = self.audio_interface.get_default_input_device_info()
-			for i in range(device_count):
-				current_device = self.audio_interface.get_device_info_by_index(i)
-				if default_device["name"] in current_device["name"] and current_device["defaultSampleRate"] == self.get_default_loopback_speakers()["defaultSampleRate"]:
-					device = current_device
-					break
-			return device
+			wasapi_device = self.audio_interface.get_host_api_info_by_type(pyaudio.paWASAPI)
 		except Exception as e:
-			raise RuntimeError(f"Cannot find a microphone with the same sample rate as default speakers. ({e})")
+			raise RuntimeError(f"Error. ({e})")
+		device = self.audio_interface.get_device_info_by_index(wasapi_device["defaultInputDevice"])
+		if not device["isLoopbackDevice"]:
+			for loopback in self.audio_interface.get_loopback_device_info_generator():
+				if device["name"] in loopback["name"]:
+					device = loopback
+					break
+		return device
 
 # Start recording definition
 	def start_recording(self):
@@ -101,7 +112,7 @@ class WasapiSoundRecorder:
 				rate=int(self.default_speakers["defaultSampleRate"]),
 				input=True,
 				input_device_index=self.default_speakers["index"],
-				frames_per_buffer=4096,
+				frames_per_buffer=1024,
 				stream_callback=self.speakers_callback
 			)
 			self.stream_mic = self.audio_interface.open(
@@ -110,7 +121,7 @@ class WasapiSoundRecorder:
 				rate=int(self.default_mic["defaultSampleRate"]),
 				input=True,
 				input_device_index=self.default_mic["index"],
-				frames_per_buffer=4096,
+				frames_per_buffer=1024,
 				stream_callback=self.mic_callback
 			)
 			# Initializing self.frames with empty value
@@ -170,7 +181,7 @@ class WasapiSoundRecorder:
 					with wave.open(output_file, "wb") as wf:
 						wf.setnchannels(self.default_speakers["maxInputChannels"])
 						wf.setsampwidth(self.audio_interface.get_sample_size(pyaudio.paInt16))
-						wf.setframerate(int(self.default_speakers["defaultSampleRate"]))
+						wf.setframerate(int(self.default_mic["defaultSampleRate"]))
 						wf.writeframes(b"".join(self.frames))
 				elif self.recording_format == "mp3":
 					# Uses the AudioSegment from pydub to convert the audio file to the .mp3 format
@@ -178,7 +189,7 @@ class WasapiSoundRecorder:
 					audio_data = AudioSegment(
 						data=b"".join(self.frames),
 						sample_width=self.audio_interface.get_sample_size(pyaudio.paInt16),
-						frame_rate=int(self.default_speakers["defaultSampleRate"]),
+						frame_rate=int(self.default_mic["defaultSampleRate"]),
 						channels=self.default_speakers["maxInputChannels"]
 					)
 					audio_data.export(output_file, format="mp3")
