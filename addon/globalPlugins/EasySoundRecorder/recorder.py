@@ -16,6 +16,7 @@ import pyaudiowpatch as pyaudio
 from pydub import AudioSegment
 from pydub.utils import audioop
 import threading
+import time
 
 class WasapiSoundRecorder:
 	def __init__(self, recording_format="wav", recording_folder=os.path.join(os.environ['USERPROFILE'], "Documents", "Easy Sound Recorder")):
@@ -50,6 +51,10 @@ class WasapiSoundRecorder:
 			mic_chunk = self.mic_data[i]
 			speaker_chunk = self.resample_audio_data(speaker_chunk, 2, int(self.default_speakers["defaultSampleRate"]), 48000)
 			mic_chunk = self.resample_audio_data(mic_chunk, 2, int(self.default_mic["defaultSampleRate"]), 48000)
+			if len(mic_chunk) < len(speaker_chunk):
+				mic_chunk += b"\x00" * (len(speaker_chunk) - len(mic_chunk))
+			elif len(mic_chunk) > len(speaker_chunk):
+				speaker_chunk += b"\x00" * (len(mic_chunk) - len(speaker_chunk))
 			combined_data = bytearray()
 			for j in range(0, len(speaker_chunk), 2):
 				speaker_sample = int.from_bytes(speaker_chunk[j:j + 2], "little", signed=True)
@@ -115,6 +120,7 @@ class WasapiSoundRecorder:
 				frames_per_buffer=1024,
 				stream_callback=self.speakers_callback
 			)
+			time.sleep(0.01)
 			self.stream_mic = self.audio_interface.open(
 				format=pyaudio.paInt16,
 				channels=self.default_mic["maxInputChannels"],
@@ -144,6 +150,7 @@ class WasapiSoundRecorder:
 		try:
 			self.recording = 1
 			self.stream_card.start_stream()
+			time.sleep(0.01)
 			self.stream_mic.start_stream()
 		except Exception as e:
 			raise RuntimeError(f"Error while resuming recording {e}")
