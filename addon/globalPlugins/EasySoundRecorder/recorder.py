@@ -28,6 +28,8 @@ class WasapiSoundRecorder:
 		self.stream_speakers = None
 		self.default_speakers = self.get_default_loopback_speakers()
 		self.default_mic = self.get_default_loopback_mic()
+		self.speakers_samplerate = int(self.default_speakers["defaultSampleRate"])
+		self.mic_samplerate = int(self.default_mic["defaultSampleRate"])
 		# self.mic_data and self.speaker_data are byte arrays for storing the recording data for boath streams
 		self.speaker_data = []
 		self.mic_data = []
@@ -49,8 +51,6 @@ class WasapiSoundRecorder:
 		for i in range(min(len(self.speaker_data), len(self.mic_data))):
 			speaker_chunk = self.speaker_data[i]
 			mic_chunk = self.mic_data[i]
-			speaker_chunk = self.resample_audio_data(speaker_chunk, 2, int(self.default_speakers["defaultSampleRate"]), 48000)
-			mic_chunk = self.resample_audio_data(mic_chunk, 2, int(self.default_mic["defaultSampleRate"]), 48000)
 			if len(mic_chunk) < len(speaker_chunk):
 				mic_chunk += b"\x00" * (len(speaker_chunk) - len(mic_chunk))
 			elif len(mic_chunk) > len(speaker_chunk):
@@ -114,7 +114,7 @@ class WasapiSoundRecorder:
 			self.stream_card = self.audio_interface.open(
 				format=pyaudio.paInt16,
 				channels=self.default_speakers["maxInputChannels"],
-				rate=int(self.default_speakers["defaultSampleRate"]),
+				rate=self.speakers_samplerate,
 				input=True,
 				input_device_index=self.default_speakers["index"],
 				frames_per_buffer=1024,
@@ -124,7 +124,7 @@ class WasapiSoundRecorder:
 			self.stream_mic = self.audio_interface.open(
 				format=pyaudio.paInt16,
 				channels=self.default_mic["maxInputChannels"],
-				rate=int(self.default_mic["defaultSampleRate"]),
+				rate=self.mic_samplerate,
 				input=True,
 				input_device_index=self.default_mic["index"],
 				frames_per_buffer=1024,
@@ -188,15 +188,15 @@ class WasapiSoundRecorder:
 					with wave.open(output_file, "wb") as wf:
 						wf.setnchannels(self.default_speakers["maxInputChannels"])
 						wf.setsampwidth(self.audio_interface.get_sample_size(pyaudio.paInt16))
-						wf.setframerate(int(self.default_mic["defaultSampleRate"]))
-						wf.writeframes(b"".join(self.frames))
+						wf.setframerate(self.mic_samplerate)
+						wf.writeframesraw(b"".join(self.frames))
 				elif self.recording_format == "mp3":
 					# Uses the AudioSegment from pydub to convert the audio file to the .mp3 format
 					AudioSegment.converter = os.path.join(os.path.dirname(__file__), "ffmpeg.exe")
 					audio_data = AudioSegment(
 						data=b"".join(self.frames),
 						sample_width=self.audio_interface.get_sample_size(pyaudio.paInt16),
-						frame_rate=int(self.default_mic["defaultSampleRate"]),
+						frame_rate=self.mic_samplerate,
 						channels=self.default_speakers["maxInputChannels"]
 					)
 					audio_data.export(output_file, format="mp3")
@@ -219,11 +219,15 @@ class WasapiSoundRecorder:
 	def re_initialize_devices(self):
 		self.default_mic = None
 		self.default_speakers = None
+		self.mic_samplerate = None
+		self.speakers_samplerate = None
 		if self.audio_interface:
 			self.audio_interface.terminate()
 		self.audio_interface = pyaudio.PyAudio()
 		self.default_speakers = self.get_default_loopback_speakers()
 		self.default_mic = self.get_default_loopback_mic()
+		self.speakers_samplerate = int(self.default_speakers["defaultSampleRate"])
+		self.mic_samplerate = int(self.default_mic["defaultSampleRate"])
 
 	def terminate(self):
 		self.audio_interface.terminate()
