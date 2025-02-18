@@ -11,6 +11,7 @@ module_path = os.path.dirname(__file__)
 if module_path not in sys.path:
 	sys.path.append(module_path)
 import wave
+import numpy as np
 from datetime import datetime
 import pyaudiowpatch as pyaudio
 from pydub import AudioSegment
@@ -55,13 +56,11 @@ class WasapiSoundRecorder:
 				mic_chunk += b"\x00" * (len(speaker_chunk) - len(mic_chunk))
 			elif len(mic_chunk) > len(speaker_chunk):
 				speaker_chunk += b"\x00" * (len(mic_chunk) - len(speaker_chunk))
-			combined_data = bytearray()
-			for j in range(0, len(speaker_chunk), 2):
-				speaker_sample = int.from_bytes(speaker_chunk[j:j + 2], "little", signed=True)
-				mic_sample = int.from_bytes(mic_chunk[j:j + 2], "little", signed=True)
-				combined_sample = max(min(speaker_sample + mic_sample, 32767), -32768)
-				combined_data.extend(combined_sample.to_bytes(2, "little", signed=True))
-			self.frames.append(bytes(combined_data))
+			speaker_array = np.frombuffer(speaker_chunk, dtype=np.int16)
+			mic_array = np.frombuffer(mic_chunk, dtype=np.int16)
+			combined_array = speaker_array.astype(np.int32) + mic_array.astype(np.int32)
+			combined_array = np.clip(combined_array, -32768, 32767).astype(np.int16)
+			self.frames.append(combined_array.tobytes())
 
 # Speakers and microphone callbacks
 	def speakers_callback(self, in_data, frame_count, time_info, status):
@@ -117,7 +116,7 @@ class WasapiSoundRecorder:
 				rate=self.speakers_samplerate,
 				input=True,
 				input_device_index=self.default_speakers["index"],
-				frames_per_buffer=1024,
+				frames_per_buffer=4096,
 				stream_callback=self.speakers_callback
 			)
 			time.sleep(0.01)
@@ -127,7 +126,7 @@ class WasapiSoundRecorder:
 				rate=self.mic_samplerate,
 				input=True,
 				input_device_index=self.default_mic["index"],
-				frames_per_buffer=1024,
+				frames_per_buffer=4096,
 				stream_callback=self.mic_callback
 			)
 			# Initializing self.frames with empty value
@@ -189,7 +188,7 @@ class WasapiSoundRecorder:
 						wf.setnchannels(self.default_speakers["maxInputChannels"])
 						wf.setsampwidth(self.audio_interface.get_sample_size(pyaudio.paInt16))
 						wf.setframerate(self.mic_samplerate)
-						wf.writeframesraw(b"".join(self.frames))
+						wf.writeframes(b"".join(self.frames))
 				elif self.recording_format == "mp3":
 					# Uses the AudioSegment from pydub to convert the audio file to the .mp3 format
 					AudioSegment.converter = os.path.join(os.path.dirname(__file__), "ffmpeg.exe")
