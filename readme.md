@@ -13,9 +13,10 @@ Using Easy Sound Recorder is very simple with just two commands:
 * **Shift+NVDA+R** – Starts recording, pauses, and resumes recording,
 * **Shift+NVDA+T** – Stops recording and saves the recording as a `.wav` or `.mp3` file, depending on the settings.
 
-# Important note
+# Important notes
 
-After you turn off your bluetooth speakers, if recording do not starts, it is necesary to restart your NVDA to re initialize the default output device.
+* After you turn off your bluetooth speakers, if recording do not starts, it is necesary to restart your NVDA to re initialize the default output device.
+* If you hear microphone clipping in recordings, please set your microphone format to be the same format as your sound card in the Sound section in the Control Panel.
 
 After installing Easy Sound Recorder, the default folder for saving recordings is:  
 `C:\Users\username\Documents\EasySoundRecorder`

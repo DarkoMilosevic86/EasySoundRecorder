@@ -12,8 +12,9 @@ Jednostavan Snimač Zvuka koristite veoma jednostavno koristeći samo 2 komande:
 * Shift+NVDA+R - Pokreće snimanje, pauzira i nastavlja snimanje,
 * Shift+NVDA+T - Zaustavlja snimanje i čuva snimak u .wav, ili .mp3 datoteku, u zavisnosti od podešavanja.
 
-## Važna napomena
-Prilikom gašenja bluetooth slušalica može se dogoditi da Jednostavan Snimač Zvuka ne promeni automatski izlazni uređaj za snimanje, tako da ukoliko snimanje ne započne, morate ponovo pokrenuti NVDA.
+## Važne napomene
+* Prilikom gašenja bluetooth slušalica može se dogoditi da Jednostavan Snimač Zvuka ne promeni automatski izlazni uređaj za snimanje, tako da ukoliko snimanje ne započne, morate ponovo pokrenuti NVDA.
+* Ukoliko se dogodi da mikrofon blago secka kod snimka, podesite format mikrofona da odgovara formatu vaše zvučne kartice u odeljku Zvuk u kontrolnoj tabli.
 
 Kada instalirate Jednostavan Snimač Zvuka, podrazumevana fascikla u koju se čuvaju snimci je "C:\Users\username\Documents\JednostavanSoundRecorder".
 Tako na primer ako je vaše korisničko ime John, snimci će sse po zadatim podešavanjima čuvati u:
