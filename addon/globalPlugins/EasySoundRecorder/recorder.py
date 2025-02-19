@@ -62,6 +62,13 @@ class WasapiSoundRecorder:
 			combined_array = np.clip(combined_array, -32768, 32767).astype(np.int16)
 			self.frames.append(combined_array.tobytes())
 
+	def write_test(self):
+		for i in range(min(len(self.speaker_data), len(self.mic_data))):
+			speaker_chunk = self.speaker_data[i]
+			mic_chunk = self.mic_data[i]
+			comb_data = speaker_chunk * mic_chunk
+			self.frames.append(comb_data)
+
 # Speakers and microphone callbacks
 	def speakers_callback(self, in_data, frame_count, time_info, status):
 		# Appending self.speaker_data array while recording
@@ -69,6 +76,9 @@ class WasapiSoundRecorder:
 		return (in_data, pyaudio.paContinue)
 
 	def mic_callback(self, in_data, frame_count, time_info, status):
+		# Resampling microphone if sample rate is not equal to sound cards sample rate
+		if not self.mic_samplerate == self.speakers_samplerate:
+			in_data = self.resample_audio_data(in_data, self.default_mic["maxInputChannels"], self.mic_samplerate, self.speakers_samplerate)
 		# Appending self.mic_data array while recording
 		self.mic_data.append(in_data)
 		return (in_data, pyaudio.paContinue)
@@ -175,7 +185,7 @@ class WasapiSoundRecorder:
 # Writing and saving data definition
 	def write_and_save_data(self):
 		try:
-			self.write_audio_data()
+			self.write_test()
 			if self.frames:
 				# Defines the path of the audio file
 				timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -187,7 +197,7 @@ class WasapiSoundRecorder:
 					with wave.open(output_file, "wb") as wf:
 						wf.setnchannels(self.default_speakers["maxInputChannels"])
 						wf.setsampwidth(self.audio_interface.get_sample_size(pyaudio.paInt16))
-						wf.setframerate(self.mic_samplerate)
+						wf.setframerate(self.speakers_samplerate)
 						wf.writeframes(b"".join(self.frames))
 				elif self.recording_format == "mp3":
 					# Uses the AudioSegment from pydub to convert the audio file to the .mp3 format
@@ -195,7 +205,7 @@ class WasapiSoundRecorder:
 					audio_data = AudioSegment(
 						data=b"".join(self.frames),
 						sample_width=self.audio_interface.get_sample_size(pyaudio.paInt16),
-						frame_rate=self.mic_samplerate,
+						frame_rate=self.speakers_samplerate,
 						channels=self.default_speakers["maxInputChannels"]
 					)
 					audio_data.export(output_file, format="mp3")
