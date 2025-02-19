@@ -58,16 +58,9 @@ class WasapiSoundRecorder:
 				speaker_chunk += b"\x00" * (len(mic_chunk) - len(speaker_chunk))
 			speaker_array = np.frombuffer(speaker_chunk, dtype=np.int16)
 			mic_array = np.frombuffer(mic_chunk, dtype=np.int16)
-			combined_array = speaker_array.astype(np.int32) + mic_array.astype(np.int32)
+			combined_array = speaker_array.astype(np.int16) + mic_array.astype(np.int16)
 			combined_array = np.clip(combined_array, -32768, 32767).astype(np.int16)
 			self.frames.append(combined_array.tobytes())
-
-	def write_test(self):
-		for i in range(min(len(self.speaker_data), len(self.mic_data))):
-			speaker_chunk = self.speaker_data[i]
-			mic_chunk = self.mic_data[i]
-			comb_data = speaker_chunk * mic_chunk
-			self.frames.append(comb_data)
 
 # Speakers and microphone callbacks
 	def speakers_callback(self, in_data, frame_count, time_info, status):
@@ -185,7 +178,7 @@ class WasapiSoundRecorder:
 # Writing and saving data definition
 	def write_and_save_data(self):
 		try:
-			self.write_test()
+			self.write_audio_data()
 			if self.frames:
 				# Defines the path of the audio file
 				timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
