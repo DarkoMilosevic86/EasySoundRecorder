@@ -1,8 +1,8 @@
+# -*- coding: UTF-8 -*-
+
 # Copyright (C) 2024 Darko Milošević
 # This file is covered by the GNU General Public License.
 # See the file COPYING.txt for more details.
-
-
 
 import sys
 from globalPluginHandler import GlobalPlugin

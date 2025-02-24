@@ -1,0 +1,94 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 'EasySoundRecorder' '1.0.1'\n"
+"Report-Msgid-Bugs-To: 'nvda-translations@groups.io'\n"
+"POT-Creation-Date: 2025-02-20 23:45+0300\n"
+"PO-Revision-Date: 2025-02-24 11:53+0300\n"
+"Last-Translator: Ruslan Kolodyazhni <rupelodn@gmail.com>\n"
+"Language-Team: Translators <nvda-translations@groups.io>\n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+#. Translators: Settings dialog title
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:46
+msgid "Easy Sound Recorder settings"
+msgstr "Настройки Лёгкой Звукозаписи"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:52
+msgid "Select folder for recordings"
+msgstr "Выберите папку для записей"
+
+#. Translators: Recording formats
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:63
+msgid "Please specify the recording format (wav or mp3)"
+msgstr "Укажите формат записи (wav или mp3)"
+
+#. Translators: Recording folder label
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:66
+msgid "Please specify a folder where recordings will be saved"
+msgstr "Укажите папку, где будут сохранены записи"
+
+#. Translators: Browse recording folder button
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:70
+msgid "Browse..."
+msgstr "Обзор..."
+
+#. Translators: Error saving configuration message
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:85
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:109
+msgid "Error while saving Easy Sound Recorder configuration."
+msgstr "Ошибка при сохранении конфигурации лёгкой звукозаписи."
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:98
+msgid "Easy Sound Recorder settings..."
+msgstr "Настройки Лёгкой Звукозаписи..."
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:114
+msgid "Starts, pauses and resumes recording"
+msgstr "Начинает, приостанавливает и возобновляет запись"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:119
+msgid "Recording paused"
+msgstr "Запись приостановлена"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:121
+msgid "Recording resumed"
+msgstr "Запись возобновлена"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:125
+msgid "Recording started"
+msgstr "Запись начата"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:129
+msgid "Stops recording and saves the audio file using specifyed format."
+msgstr "Останавливает запись и сохраняет звуковой файл в указанный формат."
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:134
+msgid "Recording stopped"
+msgstr "Запись остановлена"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:136
+msgid "No recording is in progress."
+msgstr "Запись не ведётся."
+
+#. Add-on summary, usually the user visible name of the addon.
+#. Translators: Summary for this add-on
+#. to be shown on installation and add-on information found in Add-ons Manager.
+#: buildVars.py:23
+msgid "Easy Sound Recorder"
+msgstr "Лёгкая Звукозапись"
+
+#. Add-on description
+#. Translators: Long description to be shown for this add-on on add-on information from add-ons manager
+#: buildVars.py:26
+msgid "Records sound from microphone and sound card using WASAPI."
+msgstr "Записывает звук с микрофона и звуковой карты с использованием wasapi."

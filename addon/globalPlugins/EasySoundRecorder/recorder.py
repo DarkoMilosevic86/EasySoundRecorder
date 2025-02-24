@@ -19,6 +19,14 @@ from pydub.utils import audioop
 import threading
 import time
 
+def interleave(left, right):
+	return np.ravel(np.vstack((left, right)), order='F')
+
+def uninterleave(data):
+	return np.reshape(data, (2, -1), 'F')
+
+
+
 class WasapiSoundRecorder:
 	def __init__(self, recording_format="wav", recording_folder=os.path.join(os.environ['USERPROFILE'], "Documents", "Easy Sound Recorder")):
 		self.recording_folder = recording_folder
@@ -61,6 +69,13 @@ class WasapiSoundRecorder:
 			combined_array = speaker_array.astype(np.int16) + mic_array.astype(np.int16)
 			combined_array = np.clip(combined_array, -32768, 32767).astype(np.int16)
 			self.frames.append(combined_array.tobytes())
+
+	def write_audio_data_TEST(self):
+		for i in range(min(len(self.speaker_data), len(self.mic_data))):
+			speaker_chunk = self.speaker_data[i]
+			mic_chunk = self.mic_data[i]
+			combined_data = (np.frombuffer(speaker_chunk, dtype=np.int16)+np.frombuffer(mic_chunk, dtype=np.int16))//2
+			self.frames.append(combined_data.tobytes())
 
 # Speakers and microphone callbacks
 	def speakers_callback(self, in_data, frame_count, time_info, status):
@@ -119,7 +134,7 @@ class WasapiSoundRecorder:
 				rate=self.speakers_samplerate,
 				input=True,
 				input_device_index=self.default_speakers["index"],
-				frames_per_buffer=4096,
+				frames_per_buffer=8192,
 				stream_callback=self.speakers_callback
 			)
 			time.sleep(0.01)
@@ -129,7 +144,7 @@ class WasapiSoundRecorder:
 				rate=self.mic_samplerate,
 				input=True,
 				input_device_index=self.default_mic["index"],
-				frames_per_buffer=4096,
+				frames_per_buffer=8192,
 				stream_callback=self.mic_callback
 			)
 			# Initializing self.frames with empty value
@@ -178,7 +193,7 @@ class WasapiSoundRecorder:
 # Writing and saving data definition
 	def write_and_save_data(self):
 		try:
-			self.write_audio_data()
+			self.write_audio_data_TEST()
 			if self.frames:
 				# Defines the path of the audio file
 				timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

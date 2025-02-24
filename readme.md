@@ -4,12 +4,14 @@ This add-on utilizes the currently active sound card or Bluetooth headset, as we
 
 # Installation
 You can install Easy Sound Recorder in two ways:
+
 * Using the add-on store,
 * Downloading the latest version of the add-on from the page  
   [https://github.com/DarkoMilosevic86/EasySoundRecorder/releases](https://github.com/DarkoMilosevic86/EasySoundRecorder/releases)
 
 # Usage
 Using Easy Sound Recorder is very simple with just two commands:
+
 * **Shift+NVDA+R** – Starts recording, pauses, and resumes recording,
 * **Shift+NVDA+T** – Stops recording and saves the recording as a `.wav` or `.mp3` file, depending on the settings.
 
@@ -34,6 +36,7 @@ You can change the recording format and the save folder in the Easy Sound Record
 5. Press **Enter**, and the Easy Sound Recorder settings dialog will appear.
 
 In this dialog, you can configure the recording format:
+
 * WAV
 * MP3  
 
@@ -45,11 +48,14 @@ If the folder where recordings should be saved does not exist, it will be create
 
 # For Developers
 If you want to contribute to the development of Easy Sound Recorder, you can do so as follows:
-* Clone the GitHub repository using the following command:
+
+* Clone the GitHub repository using the following command:  
   ```bash
   git clone https://github.com/DarkoMilosevic86/EasySoundRecorder.git
-• Fork this repository and make the necessary changes, whether it’s adding localization or modifying the code,
-• Create a pull request to merge your changes into the main repository.
-Reporting Issues
+* Fork this repository and make the necessary changes, whether it’s adding localization or modifying the code,
+* Create a pull request to merge your changes into the main repository.
+
+# Reporting Issues
 If you encounter any issues while using Easy Sound Recorder, open a discussion on the following page:
-https://github.com/DarkoMilosevic86/EasySoundRecorder/issues
+
+[https://github.com/DarkoMilosevic86/EasySoundRecorder/issues](https://github.com/DarkoMilosevic86/EasySoundRecorder/issues)
