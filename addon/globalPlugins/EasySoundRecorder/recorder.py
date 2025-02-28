@@ -17,13 +17,7 @@ import pyaudiowpatch as pyaudio
 from pydub import AudioSegment
 from pydub.utils import audioop
 import threading
-import time
-
-def interleave(left, right):
-	return np.ravel(np.vstack((left, right)), order='F')
-
-def uninterleave(data):
-	return np.reshape(data, (2, -1), 'F')
+import tones
 
 
 
@@ -39,57 +33,15 @@ class WasapiSoundRecorder:
 		self.default_mic = self.get_default_loopback_mic()
 		self.speakers_samplerate = int(self.default_speakers["defaultSampleRate"])
 		self.mic_samplerate = int(self.default_mic["defaultSampleRate"])
-		# self.mic_data and self.speaker_data are byte arrays for storing the recording data for boath streams
-		self.speaker_data = []
-		self.mic_data = []
 		self.frames = []
 
 # Function for resampling audio data
 	def resample_audio_data(self, data_buffer, channels, in_rate, out_rate):
 		state = None
-		converted_audio, _ = audioop.ratecv(data_buffer, 2, channels, in_rate, out_rate, state)
-		expected_len = int(len(data_buffer) * (out_rate / in_rate))
-		if len(converted_audio) < expected_len:
-			converted_audio += b"\x00" * (expected_len - len(converted_audio))
-		elif len(converted_audio) > expected_len:
-			converted_audio = converted_audio[:expected_len]
+		converted_audio, _ = audioop.ratecv(data_buffer, 2, channels, in_rate, out_rate, None)
 		return converted_audio
 
-# Function definition for combining speakers and microphone streams together
-	def write_audio_data(self):
-		for i in range(min(len(self.speaker_data), len(self.mic_data))):
-			speaker_chunk = self.speaker_data[i]
-			mic_chunk = self.mic_data[i]
-			if len(mic_chunk) < len(speaker_chunk):
-				mic_chunk += b"\x00" * (len(speaker_chunk) - len(mic_chunk))
-			elif len(mic_chunk) > len(speaker_chunk):
-				speaker_chunk += b"\x00" * (len(mic_chunk) - len(speaker_chunk))
-			speaker_array = np.frombuffer(speaker_chunk, dtype=np.int16)
-			mic_array = np.frombuffer(mic_chunk, dtype=np.int16)
-			combined_array = speaker_array.astype(np.int16) + mic_array.astype(np.int16)
-			combined_array = np.clip(combined_array, -32768, 32767).astype(np.int16)
-			self.frames.append(combined_array.tobytes())
 
-	def write_audio_data_TEST(self):
-		for i in range(min(len(self.speaker_data), len(self.mic_data))):
-			speaker_chunk = self.speaker_data[i]
-			mic_chunk = self.mic_data[i]
-			combined_data = (np.frombuffer(speaker_chunk, dtype=np.int16)+np.frombuffer(mic_chunk, dtype=np.int16))//2
-			self.frames.append(combined_data.tobytes())
-
-# Speakers and microphone callbacks
-	def speakers_callback(self, in_data, frame_count, time_info, status):
-		# Appending self.speaker_data array while recording
-		self.speaker_data.append(in_data)
-		return (in_data, pyaudio.paContinue)
-
-	def mic_callback(self, in_data, frame_count, time_info, status):
-		# Resampling microphone if sample rate is not equal to sound cards sample rate
-		if not self.mic_samplerate == self.speakers_samplerate:
-			in_data = self.resample_audio_data(in_data, self.default_mic["maxInputChannels"], self.mic_samplerate, self.speakers_samplerate)
-		# Appending self.mic_data array while recording
-		self.mic_data.append(in_data)
-		return (in_data, pyaudio.paContinue)
 
 # Getting the default speakers as WASAPI loopback device
 	def get_default_loopback_speakers(self):
@@ -108,16 +60,9 @@ class WasapiSoundRecorder:
 # Getting the default loopback microphone
 	def get_default_loopback_mic(self):
 		try:
-			wasapi_device = self.audio_interface.get_host_api_info_by_type(pyaudio.paWASAPI)
-		except Exception as e:
-			raise RuntimeError(f"Error. ({e})")
-		device = self.audio_interface.get_device_info_by_index(wasapi_device["defaultInputDevice"])
-		if not device["isLoopbackDevice"]:
-			for loopback in self.audio_interface.get_loopback_device_info_generator():
-				if device["name"] in loopback["name"]:
-					device = loopback
-					break
-		return device
+			return self.audio_interface.get_default_input_device_info()
+		except:
+			raise RuntimeError("Cannot find default microphone.")
 
 # Start recording definition
 	def start_recording(self):
@@ -134,24 +79,38 @@ class WasapiSoundRecorder:
 				rate=self.speakers_samplerate,
 				input=True,
 				input_device_index=self.default_speakers["index"],
-				frames_per_buffer=8192,
-				stream_callback=self.speakers_callback
+				frames_per_buffer=8192
 			)
-			time.sleep(0.01)
 			self.stream_mic = self.audio_interface.open(
 				format=pyaudio.paInt16,
 				channels=self.default_mic["maxInputChannels"],
 				rate=self.mic_samplerate,
 				input=True,
 				input_device_index=self.default_mic["index"],
-				frames_per_buffer=8192,
-				stream_callback=self.mic_callback
+				frames_per_buffer=8192
 			)
 			# Initializing self.frames with empty value
 			self.frames = []
+			threading.Thread(target=self.collect_data).start()
 		except Exception as e:
 			self.recording = False
 			raise RuntimeError(f"Failed to start recording: {e}")
+
+	def collect_data(self):
+		while self.recording == 1:
+			speaker_data = self.stream_card.read(8192, exception_on_overflow=False)
+			mic_data = self.stream_mic.read(8192, exception_on_overflow=False)
+			if not self.mic_samplerate == self.speakers_samplerate:
+				mic_data = self.resample_audio_data(mic_data, self.default_mic["maxInputChannels"], self.mic_samplerate, self.speakers_samplerate)
+			speaker_chunk = np.frombuffer(speaker_data, dtype=np.int16)
+			mic_chunk = np.frombuffer(mic_data, dtype=np.int16)
+			min_len = min(len(speaker_chunk), len(mic_chunk))
+			speaker_chunk = speaker_chunk[:min_len]
+			mic_chunk = mic_chunk[:min_len]
+			mixed_audio = speaker_chunk.astype(np.int32)+mic_chunk.astype(np.int32)
+			mixed_audio = np.clip(mixed_audio, -32768, 32767)
+			mixed_audio = mixed_audio.astype(np.int16)
+			self.frames.append(mixed_audio.tobytes())
 
 # Definition for pause recording
 	def pause_recording(self):
@@ -167,8 +126,8 @@ class WasapiSoundRecorder:
 		try:
 			self.recording = 1
 			self.stream_card.start_stream()
-			time.sleep(0.01)
 			self.stream_mic.start_stream()
+			threading.Thread(target=self.collect_data).start()
 		except Exception as e:
 			raise RuntimeError(f"Error while resuming recording {e}")
 
@@ -193,7 +152,6 @@ class WasapiSoundRecorder:
 # Writing and saving data definition
 	def write_and_save_data(self):
 		try:
-			self.write_audio_data_TEST()
 			if self.frames:
 				# Defines the path of the audio file
 				timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -219,6 +177,8 @@ class WasapiSoundRecorder:
 					audio_data.export(output_file, format="mp3")
 				else:
 					raise ValueError("Unsupported format. Only 'wav' is currently supported.")
+			tones.beep(400, 500)
+			tones.beep(500, 1000)
 		except Exception as e:
 			raise RuntimeError(f"Error while saving recording ({e})")
 
@@ -226,10 +186,6 @@ class WasapiSoundRecorder:
 	def reset(self):
 		self.frames = None
 		self.frames = []
-		self.speaker_data = None
-		self.speaker_data = []
-		self.mic_data = None
-		self.mic_data = []
 		self.re_initialize_devices()
 
 # Device re initialization definition
