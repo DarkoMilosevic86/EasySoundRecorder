@@ -178,7 +178,7 @@ class WasapiSoundRecorder:
 				else:
 					raise ValueError("Unsupported format. Only 'wav' is currently supported.")
 			tones.beep(400, 500)
-			tones.beep(500, 1000)
+			tones.beep(600, 600)
 		except Exception as e:
 			raise RuntimeError(f"Error while saving recording ({e})")
 
