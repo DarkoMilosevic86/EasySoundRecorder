@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Darko Milošević
+# Copyright (C) 2024-2025 Darko Milošević
 # This file is covered by the GNU General Public License.
 # See the file COPYING.txt for more details.
 
@@ -18,7 +18,25 @@ from pydub import AudioSegment
 from pydub.utils import audioop
 import threading
 import tones
+import time
 
+"""
+Sound cutting and mixing functions
+These functions are not necesary to be inside the Recorder classs.
+"""
+
+def cut (data, start=None, end=None):
+	ct = data[start:end]
+	return np.delete(data, slice(start, end)), ct
+
+def mix (data1, data2):
+	chunk1 = np.frombuffer(data1, dtype=np.int16)
+	chunk2 = np.frombuffer(data2, dtype=np.int16)
+	min_len = min(len(chunk1), len(chunk2))
+	chunk1, _ = cut(chunk1, min_len, None)
+	chunk2, _ = cut(chunk2, min_len, None)
+	mixed_data = (chunk1+chunk2)//2
+	return mixed_data.tobytes()
 
 
 class WasapiSoundRecorder:
@@ -83,7 +101,7 @@ class WasapiSoundRecorder:
 			)
 			self.stream_mic = self.audio_interface.open(
 				format=pyaudio.paInt16,
-				channels=self.default_mic["maxInputChannels"],
+				channels=1,
 				rate=self.mic_samplerate,
 				input=True,
 				input_device_index=self.default_mic["index"],
@@ -101,21 +119,14 @@ class WasapiSoundRecorder:
 			speaker_data = self.stream_card.read(8192, exception_on_overflow=False)
 			mic_data = self.stream_mic.read(8192, exception_on_overflow=False)
 			if not self.mic_samplerate == self.speakers_samplerate:
-				mic_data = self.resample_audio_data(mic_data, self.default_mic["maxInputChannels"], self.mic_samplerate, self.speakers_samplerate)
-			speaker_chunk = np.frombuffer(speaker_data, dtype=np.int16)
-			mic_chunk = np.frombuffer(mic_data, dtype=np.int16)
-			min_len = min(len(speaker_chunk), len(mic_chunk))
-			speaker_chunk = speaker_chunk[:min_len]
-			mic_chunk = mic_chunk[:min_len]
-			mixed_audio = speaker_chunk.astype(np.int32)+mic_chunk.astype(np.int32)
-			mixed_audio = np.clip(mixed_audio, -32768, 32767)
-			mixed_audio = mixed_audio.astype(np.int16)
-			self.frames.append(mixed_audio.tobytes())
+				mic_data = self.resample_audio_data(mic_data, 1, self.mic_samplerate, self.speakers_samplerate)
+			self.frames.append(mix(speaker_data, mic_data))
 
 # Definition for pause recording
 	def pause_recording(self):
 		try:
 			self.recording = 2
+			time.sleep(0.1)
 			self.stream_card.stop_stream()
 			self.stream_mic.stop_stream()
 		except Exception as e:
@@ -124,9 +135,11 @@ class WasapiSoundRecorder:
 # Definition for resuming recording
 	def resume_recording(self):
 		try:
-			self.recording = 1
 			self.stream_card.start_stream()
+			time.sleep(0.1)
 			self.stream_mic.start_stream()
+			time.sleep(0.1)
+			self.recording = 1
 			threading.Thread(target=self.collect_data).start()
 		except Exception as e:
 			raise RuntimeError(f"Error while resuming recording {e}")
@@ -178,7 +191,7 @@ class WasapiSoundRecorder:
 				else:
 					raise ValueError("Unsupported format. Only 'wav' is currently supported.")
 			tones.beep(400, 500)
-			tones.beep(600, 600)
+			tones.beep(800, 400)
 		except Exception as e:
 			raise RuntimeError(f"Error while saving recording ({e})")
 

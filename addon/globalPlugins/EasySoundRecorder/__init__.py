@@ -27,7 +27,7 @@ _config = None
 conf_file = "EasySoundRecorder.ini"
 configspec = StringIO("""
 					[Settings]
-					recording_format = string(default = "")
+					recording_format = string(default = "wav")
 					  recording_folder = string(default = "")
 					  """)
 
@@ -111,7 +111,8 @@ class GlobalPlugin(GlobalPlugin):
 		recorder = WasapiSoundRecorder(self.conf["Settings"]["recording_format"], self.conf["Settings"]["recording_folder"])
 
 	@script(
-		description=_("Starts, pauses and resumes recording")
+		description=_("Starts, pauses and resumes recording"),
+		gesture="kb:Shift+NVDA+R"
 	)
 	def script_startRecording(self, gesture):
 		if recorder.recording == 1:
@@ -126,7 +127,8 @@ class GlobalPlugin(GlobalPlugin):
 			recorder.start_recording()
 
 	@script(
-		description=_("Stops recording and saves the audio file using specifyed format.")
+		description=_("Stops recording and saves the audio file using specifyed format."),
+		gesture="kb:Shift+NVDA+T"
 	)
 	def script_stopRecording(self, gesture):
 		if recorder.recording == 1 or recorder.recording == 2:
@@ -135,10 +137,6 @@ class GlobalPlugin(GlobalPlugin):
 		else:
 			ui.message(_("No recording is in progress."))
 
-	__gestures = {
-		"kb:Shift+NVDA+R": "startRecording",
-		"kb:Shift+NVDA+T": "stopRecording"
-	}
 	def reset(self):
 		self._initialize_recorder()
 
