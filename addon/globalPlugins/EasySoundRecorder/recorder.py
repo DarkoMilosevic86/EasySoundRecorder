@@ -46,11 +46,15 @@ class WasapiSoundRecorder:
 		self.audio_interface = pyaudio.PyAudio()
 		self.recording = 0
 		self.stream_mic = None
-		self.stream_speakers = None
+		self.stream_card = None
 		self.default_speakers = self.get_default_loopback_speakers()
 		self.default_mic = self.get_default_loopback_mic()
 		self.speakers_samplerate = int(self.default_speakers["defaultSampleRate"])
 		self.mic_samplerate = int(self.default_mic["defaultSampleRate"])
+		self.speakers_channels= self.default_speakers["maxInputChannels"]
+		self.mic_channels = self.default_mic["maxInputChannels"]
+		self.speakers_chunk = 8192
+		self.mic_chunk = 8192
 		self.frames = []
 
 # Function for resampling audio data
@@ -93,25 +97,25 @@ class WasapiSoundRecorder:
 			# Opening speakers and microphone streams for recording
 			self.stream_card = self.audio_interface.open(
 				format=pyaudio.paInt16,
-				channels=self.default_speakers["maxInputChannels"],
+				channels=self.speakers_channels,
 				rate=self.speakers_samplerate,
 				input=True,
 				input_device_index=self.default_speakers["index"],
-				frames_per_buffer=8192
+				frames_per_buffer=self.speakers_chunk
 			)
 			self.stream_mic = self.audio_interface.open(
 				format=pyaudio.paInt16,
-				channels=1,
+				channels=self.mic_channels,
 				rate=self.mic_samplerate,
 				input=True,
 				input_device_index=self.default_mic["index"],
-				frames_per_buffer=8192
+				frames_per_buffer=self.mic_chunk
 			)
 			# Initializing self.frames with empty value
 			self.frames = []
 			threading.Thread(target=self.collect_data).start()
 		except Exception as e:
-			self.recording = False
+			self.recording = 0
 			raise RuntimeError(f"Failed to start recording: {e}")
 
 	def collect_data(self):
@@ -128,18 +132,38 @@ class WasapiSoundRecorder:
 			self.recording = 2
 			time.sleep(0.1)
 			self.stream_card.stop_stream()
+			self.stream_card.close()
+			time.sleep(0.1)
+			self.stream_card = None
 			self.stream_mic.stop_stream()
+			self.stream_mic.close()
+			self.stream_mic = None
 		except Exception as e:
 			raise RuntimeError(f"Error while pausing recording {e}")
 
 # Definition for resuming recording
 	def resume_recording(self):
 		try:
-			self.stream_card.start_stream()
+			self.stream_card = self.audio_interface.open(
+				format=pyaudio.paInt16,
+				channels=self.speakers_channels,
+				rate=self.speakers_samplerate,
+				input=True,
+				input_device_index=self.default_speakers["index"],
+				frames_per_buffer=self.speakers_chunk
+			)
 			time.sleep(0.1)
-			self.stream_mic.start_stream()
+			self.stream_mic = self.audio_interface.open(
+				format=pyaudio.paInt16,
+				channels=self.mic_channels,
+				rate=self.mic_samplerate,
+				input=True,
+				input_device_index=self.default_mic["index"],
+				frames_per_buffer=self.mic_chunk
+			)
 			time.sleep(0.1)
 			self.recording = 1
+			time.sleep(0.1)
 			threading.Thread(target=self.collect_data).start()
 		except Exception as e:
 			raise RuntimeError(f"Error while resuming recording {e}")
@@ -174,7 +198,7 @@ class WasapiSoundRecorder:
 				output_file = os.path.join(self.recording_folder, f"recording_{timestamp}.{self.recording_format}")
 				if self.recording_format == "wav":
 					with wave.open(output_file, "wb") as wf:
-						wf.setnchannels(self.default_speakers["maxInputChannels"])
+						wf.setnchannels(self.default_mic["maxInputChannels"])
 						wf.setsampwidth(self.audio_interface.get_sample_size(pyaudio.paInt16))
 						wf.setframerate(self.speakers_samplerate)
 						wf.writeframes(b"".join(self.frames))
@@ -185,7 +209,7 @@ class WasapiSoundRecorder:
 						data=b"".join(self.frames),
 						sample_width=self.audio_interface.get_sample_size(pyaudio.paInt16),
 						frame_rate=self.speakers_samplerate,
-						channels=self.default_speakers["maxInputChannels"]
+						channels=self.default_mic["maxInputChannels"]
 					)
 					audio_data.export(output_file, format="mp3")
 				else:
@@ -207,6 +231,8 @@ class WasapiSoundRecorder:
 		self.default_speakers = None
 		self.mic_samplerate = None
 		self.speakers_samplerate = None
+		self.speakers_channels = None
+		self.mic_channels = None
 		if self.audio_interface:
 			self.audio_interface.terminate()
 		self.audio_interface = pyaudio.PyAudio()
@@ -214,6 +240,8 @@ class WasapiSoundRecorder:
 		self.default_mic = self.get_default_loopback_mic()
 		self.speakers_samplerate = int(self.default_speakers["defaultSampleRate"])
 		self.mic_samplerate = int(self.default_mic["defaultSampleRate"])
+		self.speakers_channels = self.default_speakers["maxInputChannels"]
+		self.mic_channels = self.default_mic["maxInputChannels"]
 
 	def terminate(self):
 		self.audio_interface.terminate()
