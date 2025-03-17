@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (C) 2024 Darko Milošević
+# Copyright (C) 2024-2025 Darko Milošević
 # This file is covered by the GNU General Public License.
 # See the file COPYING.txt for more details.
 
@@ -9,6 +9,7 @@ from globalPluginHandler import GlobalPlugin
 import gui.guiHelper
 import ui
 from scriptHandler import script
+from .devices import Devices
 import addonHandler
 from .recorder import WasapiSoundRecorder
 import os
@@ -25,10 +26,11 @@ addonHandler.initTranslation()
 recorder = None
 _config = None
 conf_file = "EasySoundRecorder.ini"
+rec_folder = os.path.join(os.environ['USERPROFILE'], 'Documents', 'Easy Sound Recorder')
 configspec = StringIO("""
 					[Settings]
 					recording_format = string(default = "wav")
-					  recording_folder = string(default = "")
+					  recording_folder = string(default = {rec_folder})
 					  """)
 
 def get_config():
@@ -58,6 +60,7 @@ class SettingsDialog(gui.SettingsDialog):
 
 	def makeSettings(self, sizer):
 		settingsSizerHelper = gui.guiHelper.BoxSizerHelper(self, sizer=sizer)
+		self.speakers = settingsSizerHelper.addLabeledControl(_("Please specify speakers"), wx.Choice, choices=Devices().get_loopback_speakers_names())
 		choices = ["wav", "mp3"]
 		# Translators: Recording formats
 		self.recording_formats = settingsSizerHelper.addLabeledControl(_("Please specify the recording format (wav or mp3)"), wx.Choice, choices=choices)
