@@ -19,7 +19,7 @@ from configobj import validate
 import gui
 import wx
 from logHandler import log
-from io import StringIO
+from io import StringIO, BytesIO
 
 addonHandler.initTranslation()
 
@@ -29,9 +29,12 @@ conf_file = "EasySoundRecorder.ini"
 rec_folder = os.path.join(os.environ['USERPROFILE'], 'Documents', 'Easy Sound Recorder')
 configspec = StringIO("""
 					[Settings]
-					recording_format = string(default = "wav")
+					recording_format = integer(default = 0)
 					  recording_folder = string(default = {rec_folder})
-					  """)
+					  input_device = integer(default=0)
+					  output_device = integer(default=0)
+					  beep = boolean(default=True)
+					  """.format(rec_folder=rec_folder))
 
 def get_config():
 	global _config
@@ -59,27 +62,40 @@ class SettingsDialog(gui.SettingsDialog):
 				self.recording_folder.SetValue(dialog.GetPath())
 
 	def makeSettings(self, sizer):
+		self.devices = Devices()
 		settingsSizerHelper = gui.guiHelper.BoxSizerHelper(self, sizer=sizer)
-		self.speakers = settingsSizerHelper.addLabeledControl(_("Please specify speakers"), wx.Choice, choices=Devices().get_loopback_speakers_names())
+		self.conf = get_config()
+		# Translators: Select speakers label
+		self.output_device = settingsSizerHelper.addLabeledControl(_("Select output device for recording"), wx.Choice, choices=self.devices.get_loopback_speakers_names())
+		self.output_device.SetSelection(0)
+		# Translators: Label for selecting input device
+		self.input_devices = settingsSizerHelper.addLabeledControl(_("Select input device for recording"), wx.Choice, choices=self.devices.get_input_devices_names())
+		self.input_devices.SetSelection(0)
 		choices = ["wav", "mp3"]
 		# Translators: Recording formats
 		self.recording_formats = settingsSizerHelper.addLabeledControl(_("Please specify the recording format (wav or mp3)"), wx.Choice, choices=choices)
 		self.recording_formats.SetSelection(0)
 		# Translators: Recording folder label
 		self.recording_folder = settingsSizerHelper.addLabeledControl(_("Please specify a folder where recordings will be saved"), wx.TextCtrl)
-		self.conf = get_config()
 		self.recording_folder.SetValue(self.conf["Settings"]["recording_folder"])
 		# Translators: Browse recording folder button
 		self.browse_recording_folder_button = wx.Button(self, label=_("Browse..."))
 		self.browse_recording_folder_button.Bind(wx.EVT_BUTTON, self.on_browse_recording_folder_button)
 		settingsSizerHelper.addItem(self.browse_recording_folder_button)
+		# Translators: Beep when recording has saved checkbox value
+		self.beep = wx.CheckBox(self, label=_("Beep when recording has saved"))
+		self.beep.SetValue(self.conf["Settings"]["beep"])
+		settingsSizerHelper.addItem(self.beep)
 
 	def postInit(self):
-		self.recording_formats.SetFocus()
+		self.output_device.SetFocus()
 
 	def onOk(self, event):
-		self.conf["Settings"]["recording_format"] = self.recording_formats.GetStringSelection()
+		self.conf["Settings"]["recording_format"] = self.recording_formats.GetSelection()
 		self.conf["Settings"]["recording_folder"] = self.recording_folder.GetValue()
+		self.conf["Settings"]["output_device"] = self.devices.get_loopback_speakers_indexes()[self.output_device.GetSelection()]
+		self.conf["Settings"]["input_device"] = self.devices.get_input_devices_indexes()[self.input_devices.GetSelection()]
+		self.conf["Settings"]["beep"] = self.beep.GetValue()
 		try:
 			self.conf.write()
 		except IOError:
@@ -95,23 +111,18 @@ class GlobalPlugin(GlobalPlugin):
 			recorder = None
 		recorder = WasapiSoundRecorder(
 			recording_format=self.conf["Settings"]["recording_format"],
-			recording_folder=self.conf["Settings"]["recording_folder"])
+			recording_folder=self.conf["Settings"]["recording_folder"],
+			output_device=self.conf["Settings"]["output_device"],
+			input_device=self.conf["Settings"]["input_device"],
+			beep=self.conf["Settings"]["beep"])
+
 	def __init__(self):
 		super().__init__()
 		self.WasapiSoundRecorderSettingsItem = gui.mainFrame.sysTrayIcon.preferencesMenu.Append(wx.ID_ANY, _("Easy Sound Recorder settings..."))
 		gui.mainFrame.sysTrayIcon.Bind(wx.EVT_MENU, lambda evt: gui.mainFrame._popupSettingsDialog(SettingsDialog), self.WasapiSoundRecorderSettingsItem)
 		self.conf = get_config()
-		if not self.conf["Settings"]["recording_format"] and not self.conf["Settings"]["recording_folder"]:
-			self.conf["Settings"]["recording_format"] = "wav"
-			self.conf["Settings"]["recording_folder"] = os.path.join(os.environ["USERPROFILE"], "Documents", "Easy Sound Recorder")
-			try:
-				self.conf.write()
-			except IOError:
-				log.error("Error writing Easy Sound Recorder configuration", exc_info=True)
-				# Translators: Error saving configuration message
-				gui.messageBox(e.strerror, _("Error while saving Easy Sound Recorder configuration."), style=wx.OK | wx.ICON_ERROR)
 		global recorder
-		recorder = WasapiSoundRecorder(self.conf["Settings"]["recording_format"], self.conf["Settings"]["recording_folder"])
+		recorder = WasapiSoundRecorder(self.conf["Settings"]["recording_format"], self.conf["Settings"]["recording_folder"], self.conf["Settings"]["output_device"], self.conf["Settings"]["input_device"], self.conf["Settings"]["beep"])
 
 	@script(
 		description=_("Starts, pauses and resumes recording"),
