@@ -1,47 +1,108 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the 'EasySoundRecorder' package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: EasySoundRecorder nvda-addon v1.0\n"
-"POT-Creation-Date: 2025-02-02 17:52+0100\n"
-"PO-Revision-Date: 2025-02-02 17:53+0100\n"
-"Last-Translator: Darko Milosevic\n"
-"Language-Team: Darko Milosevic\n"
-"Language: sr_RS\n"
+"Project-Id-Version: 'EasySoundRecorder' '1.0.1'\n"
+"Report-Msgid-Bugs-To: 'nvda-translations@groups.io'\n"
+"POT-Creation-Date: 2025-03-19 11:49+0100\n"
+"PO-Revision-Date: 2025-03-19 12:01+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: sr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.5\n"
-"X-Poedit-Basepath: .\n"
-"X-Poedit-SourceCharset: UTF-8\n"
 
+#. Translators: Settings dialog title
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:51
 msgid "Easy Sound Recorder settings"
-msgstr "Podešavanja Jednostavnog Snimača zvuka"
+msgstr "Podešavanja jednostavnog snimača zvuka"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:57
 msgid "Select folder for recordings"
-msgstr "Izabeerite fasciklu za čuvanje snimaka"
+msgstr "Izaberite fasciklu za snimke"
+
+#. Translators: Select speakers label
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:69
+msgid "Select output device for recording"
+msgstr "Izaberite izlazni uređaj za snimanje"
+
+#. Translators: Label for selecting input device
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:72
+msgid "Select input device for recording"
+msgstr "Izaberite ulazni uređaj za snimanje"
+
+#. Translators: Recording formats
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:76
 msgid "Please specify the recording format (wav or mp3)"
-msgstr "Molimo odaberite format snimaka (wav, ili mp3)"
+msgstr "Molimo izaberite format snimaka (wav ili mp3)"
+
+#. Translators: Recording folder label
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:79
 msgid "Please specify a folder where recordings will be saved"
-msgstr "Molimo odaberite fasciklu u koju će snimci biti čuvani"
+msgstr "Molimo izaberite fasciklu u koju će snimci biti čuvani"
+
+#. Translators: Browse recording folder button
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:82
 msgid "Browse..."
-msgstr "Pretraži..."
+msgstr "Traži..."
+
+#. Translators: Beep when recording has saved checkbox value
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:86
+msgid "Beep when recording has saved"
+msgstr "Zapišti kada se snimak sačuva"
+
+#. Translators: Error saving configuration message
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:104
 msgid "Error while saving Easy Sound Recorder configuration."
-msgstr "Greška prilikom čuvanja konfiguracije za Jednostavni Snimač Zvuka."
+msgstr "Greška prilikom snimanja konfiguracije za Jednostavni snimač zvuka."
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:121
 msgid "Easy Sound Recorder settings..."
-msgstr "Podešavanja Jednostavnog Snimača zvuka..."
+msgstr "Podešavanja Jednostavnog Snimača Zvuka..."
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:128
 msgid "Starts, pauses and resumes recording"
-msgstr "Započinje, pauzira i zaustavlja snimanje"
-msgid "Stops recording and saves the audio file using specifyed format."
-msgstr "Zaustavlja snimanje i čuva audio datoteku koristeći zadati format."
+msgstr "Započinje, Pauzira i Nastavlja snimanje"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:134
 msgid "Recording paused"
-msgstr "Snimanje pauzirano"
+msgstr "Snimanje je pauzirano"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:136
 msgid "Recording resumed"
-msgstr "Snimanje nastavljeno"
+msgstr "Snimanje je nastavljeno"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:140
 msgid "Recording started"
-msgstr "Snimanje započeto"
+msgstr "Snimanje počinje"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:144
+msgid "Stops recording and saves the audio file using specifyed format."
+msgstr "Zaustavlja snimanje i čuva audio zapis koristeći izabrani format"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:150
 msgid "Recording stopped"
 msgstr "Snimanje zaustavljeno"
+
+#: addon\globalPlugins\EasySoundRecorder\__init__.py:152
 msgid "No recording is in progress."
-msgstr "Nema trenutnog snimanja u toku."
+msgstr "Nema snimanja u toku"
+
+#. Add-on summary, usually the user visible name of the addon.
+#. Translators: Summary for this add-on
+#. to be shown on installation and add-on information found in Add-ons Manager.
+#: buildVars.py:23
 msgid "Easy Sound Recorder"
-msgstr "Jednostavan Snimač Zvuka"
+msgstr "Jednostavni Snimač Zvuka"
+
+#. Add-on description
+#. Translators: Long description to be shown for this add-on on add-on information from add-ons manager
+#: buildVars.py:26
 msgid "Records sound from microphone and sound card using WASAPI."
-msgstr "Snima zvuk sa zvučne kartice i mikrofona koristeći WASAPI."
+msgstr "Snima zvuk sa zvučne kartice i mikrofona koristeći WASAPI"

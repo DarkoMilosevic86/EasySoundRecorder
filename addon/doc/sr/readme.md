@@ -40,8 +40,13 @@ U ovom dijalogu možete podesiti format čuvanja snimaka:
 * WAV
 * MP3  
 
+Takođe, možete podesiti izlazni i ulazni uređaj za snimanje, a to se odnosi na odabir vaše zvučne kartice i mikrofona.
+Kada koristite Jednostavan Snimač Zvuka prvi put, koristiće podrazumevanu zvučnu karticu i mikrofon sve dok to ne promenite u podešavanjima.
+Možete podesiti i zvučni signal koji će vas obaveštavati kada je snimanje završeno, odnosno kada je snimak sačuvan i čućete zvučni signal beep.
+Za ovo koristite Zapišti kada je snimak sačuvan checkbox.
+
 Takođe, možete podesiti i fasciklu u koju će se čuvati snimci.
-Možete upisati naziv fascikle, ili aktivirati dugme **Pretraži...** kako biste odabrali fasciklu u koju želite čuvati snimke.
+Možete upisati naziv fascikle, ili aktivirati dugme **Traži...** kako biste odabrali fasciklu u koju želite čuvati snimke.
 
 ## Važna napomena
 Ukoliko fascikla u koju čuvatte snimke ne postoji, ista će biti kreirana pri prvom snimanju.

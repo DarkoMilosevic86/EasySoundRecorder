@@ -43,6 +43,10 @@ In this dialog, you can configure the recording format:
 Additionally, you can set the folder where recordings will be saved.  
 You can either manually enter the folder name or press the **Browse...** button to select the desired folder.
 
+Also, you can configure your input and output device for recording, meanning your speakers and microphone.
+When you use the Easy Sound Recorder for the first time, it will use your default speakers and microphone.
+Additionally, you can configure beep when recording has been saved using Beep checkbox in the settings dialog, and you will here beep sound when you finish recording.
+
 ## Important Note
 If the folder where recordings should be saved does not exist, it will be created upon the first recording.
 

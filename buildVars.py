@@ -25,7 +25,7 @@ addon_info = {
 	# Translators: Long description to be shown for this add-on on add-on information from add-ons manager
 	"addon_description": _("Records sound from microphone and sound card using WASAPI."),
 	# version
-	"addon_version": "1.0.1",
+	"addon_version": "1.1.0",
 	# Author(s)
 	"addon_author": "Darko Milosevic <daremc86@gmail.com>",
 	# URL for the add-on documentation support
