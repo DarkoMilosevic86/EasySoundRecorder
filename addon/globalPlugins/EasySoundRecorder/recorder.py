@@ -65,7 +65,9 @@ class WasapiSoundRecorder:
 		converted_audio, _ = audioop.ratecv(data_buffer, 2, channels, in_rate, out_rate, None)
 		return converted_audio
 
-
+	def mono_to_stereo(self, data):
+		stereo = audioop.tostereo(data, 2, 1, 1)
+		return stereo
 
 	def get_default_loopback_speakers(self):
 		try:
@@ -90,7 +92,6 @@ class WasapiSoundRecorder:
 	def start_recording(self):
 		try:
 			self.recording = 1
-			self.re_initialize_devices()
 			self.stream_card = self.audio_interface.open(
 				format=pyaudio.paInt16,
 				channels=self.speakers_channels,
@@ -119,6 +120,8 @@ class WasapiSoundRecorder:
 			mic_data = self.stream_mic.read(8192, exception_on_overflow=False)
 			if not self.mic_samplerate == self.speakers_samplerate:
 				mic_data = self.resample_audio_data(mic_data, 1, self.mic_samplerate, self.speakers_samplerate)
+			if self.mic_channels == 1:
+				mic_data = self.mono_to_stereo(mic_data)
 			self.frames.append(mix(speaker_data, mic_data))
 
 	def pause_recording(self):
@@ -191,7 +194,7 @@ class WasapiSoundRecorder:
 				output_file = os.path.join(self.recording_folder, f"recording_{timestamp}.{recording_formats[self.recording_format]}")
 				if self.recording_format == 0:
 					with wave.open(output_file, "wb") as wf:
-						wf.setnchannels(self.default_mic["maxInputChannels"])
+						wf.setnchannels(self.default_speakers["maxInputChannels"])
 						wf.setsampwidth(self.audio_interface.get_sample_size(pyaudio.paInt16))
 						wf.setframerate(self.speakers_samplerate)
 						wf.writeframes(b"".join(self.frames))
@@ -202,7 +205,7 @@ class WasapiSoundRecorder:
 						data=b"".join(self.frames),
 						sample_width=self.audio_interface.get_sample_size(pyaudio.paInt16),
 						frame_rate=self.speakers_samplerate,
-						channels=self.default_mic["maxInputChannels"]
+						channels=self.default_speakers["maxInputChannels"]
 					)
 					audio_data.export(output_file, format="mp3")
 				else:
@@ -221,27 +224,9 @@ class WasapiSoundRecorder:
 
 # Device re initialization definition
 	def re_initialize_devices(self):
-		self.default_mic = None
-		self.default_speakers = None
-		self.mic_samplerate = None
-		self.speakers_samplerate = None
-		self.speakers_channels = None
-		self.mic_channels = None
 		if self.audio_interface:
 			self.audio_interface.terminate()
 		self.audio_interface = pyaudio.PyAudio()
-		if self.output_device == 0:
-			self.default_speakers = self.get_default_loopback_speakers()
-		else:
-			self.default_speakers = self.audio_interface.get_device_info_by_index(self.output_device)
-		if self.input_device == 0:
-			self.default_mic = self.get_default_loopback_mic()
-		else:
-			self.default_mic = self.audio_interface.get_device_info_by_index(self.input_device)
-		self.speakers_samplerate = int(self.default_speakers["defaultSampleRate"])
-		self.mic_samplerate = int(self.default_mic["defaultSampleRate"])
-		self.speakers_channels = self.default_speakers["maxInputChannels"]
-		self.mic_channels = self.default_mic["maxInputChannels"]
 
 	def terminate(self):
 		self.audio_interface.terminate()
